@@ -1,18 +1,20 @@
 
 import { AbstractCrdt, CrdtFactory } from '../../js-lib/index.js' // eslint-disable-line
-import * as Y from 'ywasm'
+import { OpLog, Doc } from 'diamond-types-node'
+import * as random from 'lib0/random'
+import * as error from 'lib0/error'
 
-export const name = 'ywasm'
+export const name = 'diamond-types'
 
 /**
  * @implements {CrdtFactory}
  */
-export class YwasmFactory {
+export class DiamondFactory {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
   create (updateHandler) {
-    return new YwasmCRDT(updateHandler)
+    return new DiamondCRDT(updateHandler)
   }
 
   /**
@@ -21,7 +23,7 @@ export class YwasmFactory {
    * @return {AbstractCrdt}
    */
   load (updateHandler, bin) {
-    const crdt = new YwasmCRDT(updateHandler)
+    const crdt = new DiamondCRDT(updateHandler)
     crdt.applyUpdate(bin)
     return crdt
   }
@@ -34,29 +36,23 @@ export class YwasmFactory {
 /**
  * @implements {AbstractCrdt}
  */
-export class YwasmCRDT {
+export class DiamondCRDT {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
   constructor (updateHandler) {
-    this.ydoc = new Y.YDoc({})
-    this.ydoc.onUpdateV2(/** @param {Uint8Array} update */ update => {
-      updateHandler(update)
-    })
-    this.yarray = this.ydoc.getArray('array')
-    this.ymap = this.ydoc.getMap('map')
-    this.ytext = this.ydoc.getText('text')
-    /**
-     * @type {Y.YTransaction | null}
-     */
-    this.txn = null
+    this.doc = new Doc('user' + random.uint32())
+    this.oplog = new OpLog('user' + random.uint32())
+    this.initVersion = this.oplog.getLocalVersion()
+    this.version = this.oplog.getLocalVersion()
+    this.updateHandler = updateHandler
   }
 
   /**
    * @return {Uint8Array|string}
    */
   getEncodedState () {
-    return Y.encodeStateAsUpdateV2(this.ydoc)
+    return this.oplog.toBytes()
   }
 
   /**
@@ -64,8 +60,7 @@ export class YwasmCRDT {
    */
   applyUpdate (update) {
     this.transact(() => {
-      const txn = /** @type {Y.YTransaction} */ (this.txn)
-      txn.applyV2(update)
+      this.oplog.addFromBytes(update)
     })
   }
 
@@ -76,7 +71,7 @@ export class YwasmCRDT {
    * @param {Array<any>} elems
    */
   insertArray (index, elems) {
-    this.transact(() => this.yarray.insert(index, elems, this.txn))
+    error.methodUnimplemented()
   }
 
   /**
@@ -86,14 +81,14 @@ export class YwasmCRDT {
    * @param {number} len
    */
   deleteArray (index, len) {
-    this.transact(() => this.yarray.delete(index, len, this.txn))
+    error.methodUnimplemented()
   }
 
   /**
    * @return {Array<any>}
    */
   getArray () {
-    return this.yarray.toJson()
+    error.methodUnimplemented()
   }
 
   /**
@@ -103,7 +98,9 @@ export class YwasmCRDT {
    * @param {string} text
    */
   insertText (index, text) {
-    this.transact(() => this.ytext.insert(index, text, null, this.txn))
+    this.transact(() => {
+      this.oplog.ins(index, text)
+    })
   }
 
   /**
@@ -113,32 +110,36 @@ export class YwasmCRDT {
    * @param {number} len
    */
   deleteText (index, len) {
-    this.transact(() => this.ytext.delete(index, len, this.txn))
+    this.transact(() => {
+      this.oplog.del(index, len)
+    })
   }
 
   /**
    * @return {string}
    */
   getText () {
-    return this.ytext.toString()
+    return this.oplog.checkout().get()
   }
 
   /**
    * @param {function (AbstractCrdt): void} f
    */
   transact (f) {
-    if (this.txn != null) {
-      // use current transaction
+    if (this.inTransact) {
       f(this)
-    } else {
-      this.txn = this.ydoc.writeTransaction(null)
-      try {
-        f(this)
-      } finally {
-        this.txn.free()
-        this.txn = null
-      }
+      return
     }
+    this.inTransact = true
+    f(this)
+    this.updateHandler(this.oplog.getPatchSince(this.version))
+    /**
+     * We want to simulate real-world scenarios. We need to update the UI/Editor somehow. This could
+     * be achieved by calculating the ops.
+     */
+    this.oplog.getOpsSince(this.version)
+    this.version = this.oplog.getLocalVersion()
+    this.inTransact = false
   }
 
   /**
@@ -146,13 +147,13 @@ export class YwasmCRDT {
    * @param {any} val
    */
   setMap (key, val) {
-    this.transact(() => this.ymap.set(key, val, this.txn))
+    error.methodUnimplemented()
   }
 
   /**
    * @return {Map<string,any> | Object<string, any>}
    */
   getMap () {
-    return this.ymap.toJson()
+    error.methodUnimplemented()
   }
 }

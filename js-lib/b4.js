@@ -1,5 +1,4 @@
 import { setBenchmarkResult, benchmarkTime, logMemoryUsed, getMemUsed, tryGc, runBenchmark } from './utils.js'
-import * as math from 'lib0/math'
 import * as t from 'lib0/testing'
 import { CrdtFactory, AbstractCrdt } from './index.js' // eslint-disable-line
 // @ts-ignore
@@ -21,14 +20,14 @@ export const runBenchmarkB4 = async (crdtFactory, filter) => {
     let encodedState = /** @type {any} */ (null)
     ;(() => {
       // We scope the creation of doc1 so we can gc it before we parse it again.
-      const doc1 = crdtFactory.create()
+      const doc1 = crdtFactory.create(() => {})
       benchmarkTime(crdtFactory.getName(), `${id} (time)`, () => {
         for (let i = 0; i < inputData.length; i++) {
           changeFunction(doc1, inputData[i], i)
           // we forcefully overwrite updates because we want to reduce potentially significant memory overhead
         }
+        check(doc1)
       })
-      check(doc1)
       benchmarkTime(crdtFactory.getName(), `${id} (encodeTime)`, () => {
         encodedState = doc1.getEncodedState()
       })
@@ -40,8 +39,8 @@ export const runBenchmarkB4 = async (crdtFactory, filter) => {
       // @ts-ignore we only store doc so it is not garbage collected
       let doc = null // eslint-disable-line
       benchmarkTime(crdtFactory.getName(), `${id} (parseTime)`, () => {
-        // eslint-disable-next-line
         doc = crdtFactory.load(() => {}, encodedState)
+        check(doc)
       })
       logMemoryUsed(crdtFactory.getName(), id, startHeapUsed)
     })()
@@ -70,7 +69,7 @@ export const runBenchmarkB4 = async (crdtFactory, filter) => {
     let encodedState = /** @type {any} */ (null)
 
     ;(() => {
-      const doc = crdtFactory.create()
+      const doc = crdtFactory.create(() => {})
 
       benchmarkTime(crdtFactory.getName(), `${benchmarkName} (time)`, () => {
         for (let iterations = 0; iterations < multiplicator; iterations++) {

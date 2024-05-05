@@ -1,5 +1,4 @@
 
-
 import { AbstractCrdt, CrdtFactory } from '../../js-lib/index.js' // eslint-disable-line
 import { Loro } from 'loro-crdt'
 
@@ -10,20 +9,20 @@ export const name = 'loro'
  */
 export class LoroFactory {
   /**
-   * @param {function(Uint8Array):void} [updateHandler]
+   * @param {function(Uint8Array):void} updateHandler
    */
   create(updateHandler) {
     return new LoroWasm(updateHandler)
   }
 
   /**
- * @param {function(Uint8Array):void} [updateHandler]
+ * @param {function(Uint8Array):void} updateHandler
  * @param {Uint8Array} [bin]
  * @return {AbstractCrdt}
  */
   load(updateHandler, bin) {
-    const doc = new LoroWasm(updateHandler);
-    bin && doc.doc.import(bin);
+    const doc = new LoroWasm(updateHandler)
+    bin && doc.doc.import(bin)
     return doc
   }
 
@@ -37,32 +36,38 @@ export class LoroFactory {
  */
 export class LoroWasm {
   /**
-   * @param {function(Uint8Array):void} [updateHandler]
+   * @param {function(Uint8Array):void} updateHandler
    */
   constructor(updateHandler) {
-    this.doc = new Loro();
-    this.version = undefined;
-    this.updateHandler = updateHandler;
+    this.doc = new Loro()
+    this.version = undefined
+    this.updateHandler = updateHandler
     this.list = this.doc.getList('list')
     this.map = this.doc.getMap('map')
     this.text = this.doc.getText('text')
-    this.cachedUpdates = [];
-  }
-
-  update() {
-    if (this.updateHandler) {
-      this.updateHandler(this.doc.exportFrom(this.version));
-      this.version = this.doc.version();
-    }
+    /**
+     * Cached updates will be applied at the end of the transaction.
+     *
+     * @type {Array<Uint8Array>}
+     */
+    this.cachedUpdates = []
   }
 
   /**
    * @return {Uint8Array|string}
    */
   getEncodedState() {
-    const ans = this.doc.exportSnapshot()
-    // this.doc.diagnoseOplogSize();
-    return ans;
+    /**
+     * Snapshots store the operation log AND the encoded in-memory state of the document. It has
+     * faster loading time,  but the encoded document is larger and it takes longer
+     * to encode.
+     *
+     * Normal updates only store the operation log. They take longer to decode.
+     *
+     * We use the snapshot feature by default, as this is what the Loro team recommends.
+     */
+    return this.doc.exportSnapshot() // use the snapshot format
+    // return this.doc.exportFrom() // use the update format
   }
 
   /**
@@ -70,7 +75,7 @@ export class LoroWasm {
    */
   applyUpdate(update) {
     if (this.inTransact) {
-      this.cachedUpdates.push(update);
+      this.cachedUpdates.push(update)
     } else {
       this.doc.import(update)
     }
@@ -83,10 +88,11 @@ export class LoroWasm {
    * @param {Array<any>} elems
    */
   insertArray(index, elems) {
-    for (let i = 0; i < elems.length; i++) {
-      this.list.insert(index + i, elems[i])
-    }
-    this.update()
+    this.transact(() => {
+      for (let i = 0; i < elems.length; i++) {
+        this.list.insert(index + i, elems[i])
+      }
+    })
   }
 
   /**
@@ -96,8 +102,9 @@ export class LoroWasm {
    * @param {number} len
    */
   deleteArray(index, len) {
-    this.list.delete(index, len);
-    this.update()
+    this.transact(() => {
+      this.list.delete(index, len)
+    })
   }
 
   /**
@@ -114,8 +121,9 @@ export class LoroWasm {
    * @param {string} text
    */
   insertText(index, text) {
-    this.text.insert(index, text);
-    this.update()
+    this.transact(() => {
+      this.text.insert(index, text)
+    })
   }
 
   /**
@@ -125,8 +133,9 @@ export class LoroWasm {
    * @param {number} len
    */
   deleteText(index, len) {
-    this.text.delete(index, len);
-    this.update()
+    this.transact(() => {
+      this.text.delete(index, len)
+    })
   }
 
   /**
@@ -140,17 +149,19 @@ export class LoroWasm {
    * @param {function (AbstractCrdt): void} f
    */
   transact(f) {
-    this.cachedUpdates.length = 0;
-    this.inTransact = true;
-    try {
+    if (this.inTransact) {
       f(this)
-    } finally {
-      this.inTransact = false;
-      if (this.cachedUpdates) {
-        this.doc.importUpdateBatch(this.cachedUpdates);
-        this.cachedUpdates = [];
-      }
+      return
     }
+    this.inTransact = true
+    f(this)
+    if (this.cachedUpdates.length > 0) {
+      this.doc.importUpdateBatch(this.cachedUpdates)
+      this.cachedUpdates = []
+    }
+    this.updateHandler(this.doc.exportFrom(this.version))
+    this.version = this.doc.version()
+    this.inTransact = false
   }
 
   /**
@@ -158,8 +169,9 @@ export class LoroWasm {
    * @param {any} val
    */
   setMap(key, val) {
-    this.map.set(key, val);
-    this.update();
+    this.transact(() => {
+      this.map.set(key, val)
+    })
   }
 
   /**

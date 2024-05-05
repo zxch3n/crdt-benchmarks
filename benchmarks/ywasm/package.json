@@ -1,5 +1,5 @@
 {
-  "name": "ywasm",
+  "name": "ywasm-benchmarks",
   "version": "1.0.0",
   "description": "Ywasm benchmarks",
   "main": "./run.js",
@@ -16,6 +16,6 @@
   "author": "Kevin Jahns",
   "license": "MIT",
   "dependencies": {
-    "ywasm": "^0.9.3"
+    "ywasm": "^0.17.4"
   }
 }
