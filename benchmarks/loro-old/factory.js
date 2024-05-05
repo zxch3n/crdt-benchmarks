@@ -1,30 +1,22 @@
-
-
 import { AbstractCrdt, CrdtFactory } from '../../js-lib/index.js' // eslint-disable-line
 import { Loro } from 'loro-crdt'
 
-export const name = 'loro'
+export const name = 'loro-old'
 
 /**
  * @implements {CrdtFactory}
  */
 export class LoroFactory {
+  load(updateHandler, bin) {
+    const doc = new LoroWasm(updateHandler);
+    bin && doc.doc.import(bin);
+    return doc
+  }
   /**
    * @param {function(Uint8Array):void} [updateHandler]
    */
   create(updateHandler) {
     return new LoroWasm(updateHandler)
-  }
-
-  /**
- * @param {function(Uint8Array):void} [updateHandler]
- * @param {Uint8Array} [bin]
- * @return {AbstractCrdt}
- */
-  load(updateHandler, bin) {
-    const doc = new LoroWasm(updateHandler);
-    bin && doc.doc.import(bin);
-    return doc
   }
 
   getName() {
@@ -104,7 +96,7 @@ export class LoroWasm {
    * @return {Array<any>}
    */
   getArray() {
-    return this.list.toArray()
+    return this.list.value
   }
 
   /**
@@ -166,6 +158,6 @@ export class LoroWasm {
    * @return {Map<string,any> | Object<string, any>}
    */
   getMap() {
-    return this.map.toJSON()
+    return this.map.getDeepValue()
   }
 }

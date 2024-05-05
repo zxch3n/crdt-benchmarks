@@ -11,7 +11,7 @@ export class YjsFactory {
   /**
    * @param {function(Uint8Array):void} [updateHandler]
    */
-  create (updateHandler) {
+  create(updateHandler) {
     return new YjsCRDT(updateHandler)
   }
 
@@ -20,13 +20,13 @@ export class YjsFactory {
    * @param {Uint8Array} bin
    * @return {AbstractCrdt}
    */
-  load (updateHandler, bin) {
+  load(updateHandler, bin) {
     const crdt = new YjsCRDT(updateHandler)
     crdt.applyUpdate(bin)
     return crdt
   }
 
-  getName () {
+  getName() {
     return name
   }
 }
@@ -38,8 +38,8 @@ export class YjsCRDT {
   /**
    * @param {function(Uint8Array):void} [updateHandler]
    */
-  constructor (updateHandler) {
-    this.ydoc = new Y.Doc()
+  constructor(updateHandler) {
+    this.ydoc = new Y.Doc({ gc: false })
     if (updateHandler) {
       this.ydoc.on('updateV2', update => {
         updateHandler(update)
@@ -53,14 +53,14 @@ export class YjsCRDT {
   /**
    * @return {Uint8Array|string}
    */
-  getEncodedState () {
+  getEncodedState() {
     return Y.encodeStateAsUpdateV2(this.ydoc)
   }
 
   /**
    * @param {Uint8Array} update
    */
-  applyUpdate (update) {
+  applyUpdate(update) {
     Y.applyUpdateV2(this.ydoc, update)
   }
 
@@ -70,7 +70,7 @@ export class YjsCRDT {
    * @param {number} index
    * @param {Array<any>} elems
    */
-  insertArray (index, elems) {
+  insertArray(index, elems) {
     this.yarray.insert(index, elems)
   }
 
@@ -80,14 +80,14 @@ export class YjsCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteArray (index, len) {
+  deleteArray(index, len) {
     this.yarray.delete(index, len)
   }
 
   /**
    * @return {Array<any>}
    */
-  getArray () {
+  getArray() {
     return this.yarray.toArray()
   }
 
@@ -97,7 +97,7 @@ export class YjsCRDT {
    * @param {number} index
    * @param {string} text
    */
-  insertText (index, text) {
+  insertText(index, text) {
     this.ytext.insert(index, text)
   }
 
@@ -107,21 +107,21 @@ export class YjsCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteText (index, len) {
+  deleteText(index, len) {
     this.ytext.delete(index, len)
   }
 
   /**
    * @return {string}
    */
-  getText () {
+  getText() {
     return this.ytext.toString()
   }
 
   /**
    * @param {function (AbstractCrdt): void} f
    */
-  transact (f) {
+  transact(f) {
     this.ydoc.transact(() => f(this))
   }
 
@@ -129,14 +129,14 @@ export class YjsCRDT {
    * @param {string} key
    * @param {any} val
    */
-  setMap (key, val) {
+  setMap(key, val) {
     this.ymap.set(key, val)
   }
 
   /**
    * @return {Map<string,any> | Object<string, any>}
    */
-  getMap () {
+  getMap() {
     return this.ymap.toJSON()
   }
 }
