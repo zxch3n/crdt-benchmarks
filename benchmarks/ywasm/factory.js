@@ -11,7 +11,7 @@ export class YwasmFactory {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
-  create (updateHandler) {
+  create(updateHandler) {
     return new YwasmCRDT(updateHandler)
   }
 
@@ -20,13 +20,13 @@ export class YwasmFactory {
    * @param {Uint8Array} bin
    * @return {AbstractCrdt}
    */
-  load (updateHandler, bin) {
+  load(updateHandler, bin) {
     const crdt = new YwasmCRDT(updateHandler)
     crdt.applyUpdate(bin)
     return crdt
   }
 
-  getName () {
+  getName() {
     return name
   }
 }
@@ -38,8 +38,8 @@ export class YwasmCRDT {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
-  constructor (updateHandler) {
-    this.ydoc = new Y.YDoc({})
+  constructor(updateHandler) {
+    this.ydoc = new Y.YDoc({ gc: false })
     this.ydoc.onUpdateV2(/** @param {Uint8Array} update */ update => {
       updateHandler(update)
     })
@@ -55,14 +55,14 @@ export class YwasmCRDT {
   /**
    * @return {Uint8Array|string}
    */
-  getEncodedState () {
+  getEncodedState() {
     return Y.encodeStateAsUpdateV2(this.ydoc)
   }
 
   /**
    * @param {Uint8Array} update
    */
-  applyUpdate (update) {
+  applyUpdate(update) {
     this.transact(() => {
       const txn = /** @type {Y.YTransaction} */ (this.txn)
       txn.applyV2(update)
@@ -75,7 +75,7 @@ export class YwasmCRDT {
    * @param {number} index
    * @param {Array<any>} elems
    */
-  insertArray (index, elems) {
+  insertArray(index, elems) {
     this.transact(() => this.yarray.insert(index, elems, this.txn))
   }
 
@@ -85,14 +85,14 @@ export class YwasmCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteArray (index, len) {
+  deleteArray(index, len) {
     this.transact(() => this.yarray.delete(index, len, this.txn))
   }
 
   /**
    * @return {Array<any>}
    */
-  getArray () {
+  getArray() {
     return this.yarray.toJson()
   }
 
@@ -102,7 +102,7 @@ export class YwasmCRDT {
    * @param {number} index
    * @param {string} text
    */
-  insertText (index, text) {
+  insertText(index, text) {
     this.transact(() => this.ytext.insert(index, text, null, this.txn))
   }
 
@@ -112,21 +112,21 @@ export class YwasmCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteText (index, len) {
+  deleteText(index, len) {
     this.transact(() => this.ytext.delete(index, len, this.txn))
   }
 
   /**
    * @return {string}
    */
-  getText () {
+  getText() {
     return this.ytext.toString()
   }
 
   /**
    * @param {function (AbstractCrdt): void} f
    */
-  transact (f) {
+  transact(f) {
     if (this.txn != null) {
       // use current transaction
       f(this)
@@ -145,14 +145,14 @@ export class YwasmCRDT {
    * @param {string} key
    * @param {any} val
    */
-  setMap (key, val) {
+  setMap(key, val) {
     this.transact(() => this.ymap.set(key, val, this.txn))
   }
 
   /**
    * @return {Map<string,any> | Object<string, any>}
    */
-  getMap () {
+  getMap() {
     return this.ymap.toJson()
   }
 }

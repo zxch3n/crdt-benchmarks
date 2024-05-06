@@ -12,6 +12,8 @@
     "benchmarks/yjs",
     "benchmarks/ywasm",
     "benchmarks/loro",
+    "benchmarks/loro-old",
+    "benchmarks/loro-10",
     "benchmarks/automerge",
     "benchmarks/automerge-wasm",
     "benchmarks/diamond-types"
