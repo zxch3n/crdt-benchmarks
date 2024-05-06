@@ -7,7 +7,7 @@
       "automerge": "2.1.10",
       "loro": "0.15.2",
       "loro-old": "0.15.2",
-      "loro-0.10.1": "0.15.2"
+      "loro-0.10.1": "0.10.1"
     },
     "Bundle size": {
       "yjs": "84017 bytes",
@@ -16,7 +16,7 @@
       "automerge": "1696176 bytes",
       "loro": "1428575 bytes",
       "loro-old": "1583094 bytes",
-      "loro-0.10.1": "1428575 bytes"
+      "loro-0.10.1": "1050179 bytes"
     },
     "Bundle size (gzipped)": {
       "yjs": "25105 bytes",
@@ -25,7 +25,7 @@
       "automerge": "591049 bytes",
       "loro": "532944 bytes",
       "loro-old": "592039 bytes",
-      "loro-0.10.1": "532944 bytes"
+      "loro-0.10.1": "397424 bytes"
     },
     "[B1.1] Append N characters (time)": {
       "yjs": "153 ms",
