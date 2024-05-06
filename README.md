@@ -85,7 +85,7 @@ and Fire" is only 1.6 million characters long (including whitespace).
 
 **Notes**
 * The benchmarks were performed on MacBook Pro M1 2020 with 16GB RAM
-* loro-old is the version of loro on 2023-11-10, it's compiled from [this commit](https://github.com/loro-dev/loro/tree/c1613ee680c6a4757e55fcda76e4f5f627daeb56). Loro has undergone numerous changes since then, particularly in terms of encoding formats, shifting from a performance-focused version to one that prioritizes compatibility, resulting in significant performance differences. 
+* loro-old is the version of loro on 2023-11-10, it's compiled from [this commit](https://github.com/loro-dev/loro/tree/c1613ee680c6a4757e55fcda76e4f5f627daeb56). Loro has undergone numerous changes since then, particularly in terms of [encoding schema](https://github.com/loro-dev/loro/pull/219), shifting from a performance-focused version to one that prioritizes compatibility, resulting in significant performance differences. 
 * There is a more exchaustive benchmark at the bottom that only runs benchmarks
 on Yjs.
 * `memUsed` only approximates the amount of memory used. We run the JavaScript
