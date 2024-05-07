@@ -160,4 +160,8 @@ export class LoroWasm {
   getMap() {
     return this.map.getDeepValue()
   }
+
+  getVersion() {
+    return this.doc.oplogVersion()
+  }
 }

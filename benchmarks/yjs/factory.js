@@ -55,6 +55,10 @@ export class YjsCRDT {
     return Y.encodeStateAsUpdateV2(this.ydoc)
   }
 
+  getVersion() {
+    return Y.encodeSnapshotV2(Y.snapshot(this.ydoc))
+  }
+
   /**
    * @param {Uint8Array} update
    */

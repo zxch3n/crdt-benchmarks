@@ -16,7 +16,7 @@ export class AutomergeFactory {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
-  create (updateHandler) {
+  create(updateHandler) {
     return new AutomergeCRDT(updateHandler)
   }
 
@@ -25,11 +25,11 @@ export class AutomergeFactory {
    * @param {Uint8Array} bin
    * @return {AbstractCrdt}
    */
-  load (updateHandler, bin) {
+  load(updateHandler, bin) {
     return new AutomergeCRDT(updateHandler, bin)
   }
 
-  getName () {
+  getName() {
     return name
   }
 }
@@ -42,26 +42,26 @@ export class AutomergeCRDT {
    * @param {function(Uint8Array):void} updateHandler
    * @param {Uint8Array} bin
    */
-  constructor (updateHandler, bin = INITIAL_DOC_BINARY) {
+  constructor(updateHandler, bin = INITIAL_DOC_BINARY) {
     this.updateHandler = updateHandler
     this.doc = Automerge.load(bin)
   }
 
-  update () {
+  update() {
     this.updateHandler(this.doc.saveIncremental())
   }
 
   /**
    * @return {Uint8Array|string}
    */
-  getEncodedState () {
+  getEncodedState() {
     return this.doc.save()
   }
 
   /**
    * @param {Uint8Array} update
    */
-  applyUpdate (update) {
+  applyUpdate(update) {
     this.doc.loadIncremental(update)
   }
 
@@ -71,7 +71,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {Array<any>} elems
    */
-  insertArray (index, elems) {
+  insertArray(index, elems) {
     this.doc.splice(ARRAY_ID, index, 0, elems)
     this.update()
   }
@@ -82,7 +82,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteArray (index, len) {
+  deleteArray(index, len) {
     this.doc.splice(ARRAY_ID, index, len, [])
     this.update()
   }
@@ -90,7 +90,7 @@ export class AutomergeCRDT {
   /**
    * @return {Array<any>}
    */
-  getArray () {
+  getArray() {
     return /** @type {any} */ (this.doc.materialize(ARRAY_ID))
   }
 
@@ -100,7 +100,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {string} text
    */
-  insertText (index, text) {
+  insertText(index, text) {
     this.doc.splice(TEXT_ID, index, 0, [...text])
     this.update()
   }
@@ -111,7 +111,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteText (index, len) {
+  deleteText(index, len) {
     this.doc.splice(TEXT_ID, index, len, '')
     this.update()
   }
@@ -119,14 +119,14 @@ export class AutomergeCRDT {
   /**
    * @return {string}
    */
-  getText () {
+  getText() {
     return this.doc.text(TEXT_ID)
   }
 
   /**
    * @param {function (AbstractCrdt): void} f
    */
-  transact (f) {
+  transact(f) {
     f(this)
   }
 
@@ -134,7 +134,7 @@ export class AutomergeCRDT {
    * @param {string} key
    * @param {any} val
    */
-  setMap (key, val) {
+  setMap(key, val) {
     if (typeof val === 'object') {
       this.doc.putObject(MAP_ID, key, val)
     } else {
@@ -146,7 +146,12 @@ export class AutomergeCRDT {
   /**
    * @return {Map<string,any> | Object<string, any>}
    */
-  getMap () {
+  getMap() {
     return /** @type {any} */ (this.doc.materialize(MAP_ID))
+  }
+
+  getVersion() {
+    const encoder = new TextEncoder();
+    return encoder.encode(this.doc.getHeads().join(","))
   }
 }

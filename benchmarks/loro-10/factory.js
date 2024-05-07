@@ -180,4 +180,8 @@ export class LoroWasm {
   getMap() {
     return this.map.toJson()
   }
+
+  getVersion() {
+    return this.doc.oplogVersion().encode()
+  }
 }

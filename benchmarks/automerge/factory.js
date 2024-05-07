@@ -18,7 +18,7 @@ export class AutomergeFactory {
   /**
    * @param {function(Uint8Array):void} updateHandler
    */
-  create (updateHandler) {
+  create(updateHandler) {
     return new AutomergeCRDT(updateHandler)
   }
 
@@ -26,11 +26,11 @@ export class AutomergeFactory {
    * @param {function(Uint8Array):void} updateHandler
    * @param {Uint8Array} bin
    */
-  load (updateHandler, bin) {
+  load(updateHandler, bin) {
     return new AutomergeCRDT(updateHandler, bin)
   }
 
-  getName () {
+  getName() {
     return name
   }
 }
@@ -43,7 +43,7 @@ export class AutomergeCRDT {
    * @param {function(Uint8Array):void} updateHandler
    * @param {Uint8Array} init
    */
-  constructor (updateHandler, init = initialDocBinary) {
+  constructor(updateHandler, init = initialDocBinary) {
     this.updateHandler = updateHandler
     /**
      * @type {typeof initialDoc}
@@ -55,21 +55,21 @@ export class AutomergeCRDT {
     this._tr = null // current automerge transaction
   }
 
-  update () {
+  update() {
     this.updateHandler(automerge.saveIncremental(this.doc))
   }
 
   /**
    * @return {Uint8Array|string}
    */
-  getEncodedState () {
+  getEncodedState() {
     return automerge.save(this.doc)
   }
 
   /**
    * @param {Uint8Array} update
    */
-  applyUpdate (update) {
+  applyUpdate(update) {
     this.doc = automerge.loadIncremental(this.doc, update)
   }
 
@@ -79,7 +79,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {Array<any>} elems
    */
-  insertArray (index, elems) {
+  insertArray(index, elems) {
     this.transact((_doc, d) => {
       d.array.splice(index, 0, ...elems)
     })
@@ -91,7 +91,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteArray (index, len) {
+  deleteArray(index, len) {
     this.transact((_doc, d) => {
       d.array.splice(index, len)
     })
@@ -100,7 +100,7 @@ export class AutomergeCRDT {
   /**
    * @return {Array<any>}
    */
-  getArray () {
+  getArray() {
     return this.doc.array
   }
 
@@ -110,7 +110,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {string} text
    */
-  insertText (index, text) {
+  insertText(index, text) {
     this.transact((_doc, d) => {
       automerge.splice(d, ['text'], index, 0, text)
     })
@@ -122,7 +122,7 @@ export class AutomergeCRDT {
    * @param {number} index
    * @param {number} len
    */
-  deleteText (index, len) {
+  deleteText(index, len) {
     this.transact((_doc, d) => {
       automerge.splice(d, ['text'], index, len, '')
     })
@@ -131,7 +131,7 @@ export class AutomergeCRDT {
   /**
    * @return {string}
    */
-  getText () {
+  getText() {
     return this.doc.text.toString()
   }
 
@@ -139,7 +139,7 @@ export class AutomergeCRDT {
    * @param {function (AbstractCrdt, typeof initialDoc): void} f
    * @param {boolean} isUpdate
    */
-  transact (f, isUpdate = false) {
+  transact(f, isUpdate = false) {
     if (isUpdate) {
       // automerge doesn't handle update changes in a "change" transaction
       f(this, this.doc)
@@ -159,7 +159,7 @@ export class AutomergeCRDT {
    * @param {string} key
    * @param {any} val
    */
-  setMap (key, val) {
+  setMap(key, val) {
     this.transact((_doc, d) => {
       // the b3.3 benchmark creates 30,000 javascript strings and adds them to
       // a map. `string` in automerge is represented as a sequence CRDT. This
@@ -180,7 +180,7 @@ export class AutomergeCRDT {
   /**
    * @return {Map<string,any> | Object<string, any>}
    */
-  getMap () {
+  getMap() {
     // Due to the use of `RawString` described in `setMap` we need to convert
     // all the values in the map to plain strings before returning the map so
     // that the comparison checks the benchmark makes are valid.
@@ -193,5 +193,10 @@ export class AutomergeCRDT {
       }
     }
     return result
+  }
+
+  getVersion() {
+    const encoder = new TextEncoder();
+    return encoder.encode(automerge.getHeads(this.doc).join(","))
   }
 }

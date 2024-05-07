@@ -6,7 +6,7 @@
       "automerge-wasm": "0.9.0",
       "automerge": "2.1.10",
       "loro": "0.15.2",
-      "loro-old": "0.4.0-alpha.0",
+      "loro-old": "0.15.2",
       "loro-0.10.1": "0.10.1"
     },
     "Bundle size": {
@@ -1181,6 +1181,76 @@
       "automerge-wasm": "55 ms",
       "automerge": "67 ms",
       "loro-0.10.1": "44 ms"
+    },
+    "[C1.1] Concurrently insert & delete 100K (time)": {
+      "yjs": "22277 ms",
+      "loro": "2625 ms",
+      "automerge": "50692 ms"
+    },
+    "[C1.1] Concurrently insert & delete 100K (updateSize)": {
+      "yjs": "4908775 bytes",
+      "loro": "6418273 bytes",
+      "automerge": "10326487 bytes"
+    },
+    "[C1.1] Concurrently insert & delete 100K (encodeTime)": {
+      "yjs": "130 ms",
+      "loro": "476 ms",
+      "automerge": "837 ms"
+    },
+    "[C1.1] Concurrently insert & delete 100K (docSize)": {
+      "yjs": "4908888 bytes",
+      "loro": "5678098 bytes",
+      "automerge": "5404289 bytes"
+    },
+    "[C1.1] Concurrently insert & delete 100K (memUsed)": {
+      "yjs": "124.1 MB",
+      "loro": "0 B",
+      "automerge": "1.4 MB"
+    },
+    "[C1.1] Concurrently insert & delete 100K (parseTime)": {
+      "yjs": "1235 ms",
+      "loro": "408 ms",
+      "automerge": "7308 ms"
+    },
+    "[C1.1] Concurrently insert & delete 100K (versionSize)": {
+      "yjs": "222591 bytes",
+      "loro": "27 bytes",
+      "automerge": "64 bytes"
+    },
+    "[C1.2] Concurrently set Map 100K (time)": {
+      "yjs": "39911 ms",
+      "loro": "6095 ms",
+      "automerge": "472547 ms"
+    },
+    "[C1.2] Concurrently set Map 100K (updateSize)": {
+      "yjs": "980807 bytes",
+      "loro": "3111744 bytes",
+      "automerge": "5541744 bytes"
+    },
+    "[C1.2] Concurrently set Map 100K (encodeTime)": {
+      "yjs": "76 ms",
+      "loro": "38 ms",
+      "automerge": "2652 ms"
+    },
+    "[C1.2] Concurrently set Map 100K (docSize)": {
+      "yjs": "738937 bytes",
+      "loro": "351893 bytes",
+      "automerge": "1743081 bytes"
+    },
+    "[C1.2] Concurrently set Map 100K (memUsed)": {
+      "yjs": "18 MB",
+      "loro": "0 B",
+      "automerge": "0 B"
+    },
+    "[C1.2] Concurrently set Map 100K (parseTime)": {
+      "yjs": "4634 ms",
+      "loro": "347 ms",
+      "automerge": "338 ms"
+    },
+    "[C1.2] Concurrently set Map 100K (versionSize)": {
+      "loro": "314888 bytes",
+      "yjs": "416216 bytes",
+      "automerge": "1949999 bytes"
     }
   }
 }

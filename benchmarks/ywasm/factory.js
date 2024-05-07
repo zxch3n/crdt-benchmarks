@@ -155,4 +155,8 @@ export class YwasmCRDT {
   getMap() {
     return this.ymap.toJson()
   }
+
+  getVersion() {
+    return Y.encodeSnapshotV2(Y.snapshot(this.ydoc))
+  }
 }
