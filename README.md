@@ -1,6 +1,8 @@
 
 # CRDT benchmarks
 
+> The primary role of these benchmarks should be to serve as indicators of the absence of performance pitfalls rather than as measures of which project is superior. This is because different projects consistently make different trade-offs. It is inaccurate to claim that Project A is superior to Project B simply because A performs better in certain benchmarks, while Project B may excel in other areas by a significant margin.
+
 > A collection of reproducible benchmarks. *PRs are welcome.*
 
 ```sh
