@@ -1,6 +1,6 @@
 
 import { AbstractCrdt, CrdtFactory } from '../../js-lib/index.js' // eslint-disable-line
-import { Loro } from 'loro-crdt'
+import { LoroDoc, VersionVector } from 'loro-crdt'
 
 export const name = 'loro'
 
@@ -39,7 +39,7 @@ export class LoroWasm {
    * @param {function(Uint8Array):void} updateHandler
    */
   constructor(updateHandler) {
-    this.doc = new Loro()
+    this.doc = new LoroDoc()
     this.version = undefined
     this.updateHandler = updateHandler
     this.list = this.doc.getList('list')
@@ -66,7 +66,7 @@ export class LoroWasm {
      *
      * We use the snapshot feature by default, as this is what the Loro team recommends.
      */
-    return this.doc.exportSnapshot() // use the snapshot format
+    return this.doc.export({ mode: "snapshot" }) // use the snapshot format
     // return this.doc.exportFrom() // use the update format
   }
 
@@ -159,7 +159,7 @@ export class LoroWasm {
       this.doc.importUpdateBatch(this.cachedUpdates)
       this.cachedUpdates = []
     }
-    this.updateHandler(this.doc.exportFrom(this.version))
+    this.updateHandler(this.doc.export({ mode: "update", start_vv: this.version || new VersionVector(null) }))
     this.version = this.doc.version()
     this.inTransact = false
   }
