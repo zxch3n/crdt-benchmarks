@@ -40,8 +40,9 @@ export class LoroWasm {
    */
   constructor(updateHandler) {
     this.doc = new LoroDoc()
-    this.version = undefined
-    this.updateHandler = updateHandler
+    this.doc.subscribeLocalUpdates(updates => {
+      updateHandler(updates)
+    });
     this.list = this.doc.getList('list')
     this.map = this.doc.getMap('map')
     this.text = this.doc.getText('text')
@@ -67,7 +68,7 @@ export class LoroWasm {
      * We use the snapshot feature by default, as this is what the Loro team recommends.
      */
     return this.doc.export({ mode: "snapshot" }) // use the snapshot format
-    // return this.doc.exportFrom() // use the update format
+    // return this.doc.export({mode: "update"}) // use the update format
   }
 
   /**
@@ -159,8 +160,7 @@ export class LoroWasm {
       this.doc.importUpdateBatch(this.cachedUpdates)
       this.cachedUpdates = []
     }
-    this.updateHandler(this.doc.export({ mode: "update", start_vv: this.version || new VersionVector(null) }))
-    this.version = this.doc.version()
+    this.doc.commit();
     this.inTransact = false
   }
 
